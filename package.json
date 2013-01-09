@@ -1,6 +1,6 @@
 {
   "name": "ceps",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Conversor + API de acesso ao Diretório Nacional de Endereços - DNE",
   "author": "Arthur Corenzan <arthur@corenzan.com>",
   "homepage": "",
@@ -13,8 +13,8 @@
     "npm": ">= 1.1.4"
   },
   "dependencies": {
-    "express": "3.0.x",
-    "pg": "0.8.x"
+    "express": ">= 3.0.x",
+    "pg": ">= 0.8.x"
   },
   "main": "index.js"
 }

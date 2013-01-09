@@ -5,14 +5,10 @@ lib-cov
 *.dat
 *.out
 *.pid
+*.mdb
 *.gz
-
-pids
-logs
-results
 
 node_modules
 
 .DS_Store
 
-*.mdb

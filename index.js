@@ -1,22 +1,26 @@
-var express, http, pg, db;
+var express, app, pg;
 
-pg = require('pg');
 express = require('express');
+pg = require('pg');
 
-http = express();
-http.use(express.logger());
+app = express();
+app.use(express.logger());
 
-db = new pg.Client(process.env.DATABASE_URL);
-db.connect();
-
-http.get('/', function(request, response) {
+app.get('/', function(request, response) {
   var q;
 
   q = 'SELECT LG."CEP", LB."BAI_NO", LC."LOC_NO", LG."UFE_SG", LG."TLO_TX", LG."LOG_NO" FROM "LOG_LOGRADOURO" LG LEFT JOIN "LOG_LOCALIDADE" LC ON LC."LOC_NU" = LG."LOC_NU" LEFT JOIN "LOG_BAIRRO" LB ON LG."BAI_NU_INI" = LB."BAI_NU" WHERE LG."CEP" = $1 LIMIT 1;';
 
-  db.query(q, [request.query.CEP], function(error, result) {
-    response.json(error || result.rows);
+  pg.connect(process.env.DATABASE_URL, function(error, db) {
+    if(error) {
+      response.json(error);
+    } else {
+      db.query(q, [request.query.CEP], function(error, result) {
+        response.json(error || result.rows);
+        db.end();
+      });
+    }
   });
 });
 
-http.listen(process.env.PORT);
+app.listen(process.env.PORT);

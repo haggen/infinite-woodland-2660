@@ -1,0 +1,105 @@
+#!/bin/bash
+
+# Requires mdb-tools [1] and psql [2]
+##
+# 1 - http://mdbtools.sourceforge.net
+# 2 - http://www.postgresql.org
+
+# Usage:
+##
+# ./mdb2psql.sh <MDB file path> <Postgre server URL>
+
+LOGPATH="mdb2psql.log" && touch $LOGPATH
+
+function _log() {
+  if [[ "$1" == "" ]]; then
+    echo -e "" >> $LOGPATH
+  else
+    echo -e "[$(date +"%Y-%m-%d %H:%M:%S")] $@" >> $LOGPATH
+  fi
+}
+
+function log() {
+  if [[ "$1" == "-" ]]; then
+    while read LINE; do
+      _log "$LINE"
+    done
+  else
+    _log $@
+  fi
+}
+
+MDBPATH="$1"
+
+if [[ ! -s "$MDBPATH" ]]; then
+  log "FATAL: MDB file '$MDBPATH' not found"
+  exit 1
+fi
+
+PSQLURL="$2"
+
+if [[ "$PSQLURL" == "" ]]; then
+  log "FATAL: you must provide the database URL"
+  exit 1
+fi
+
+RE="postgres://((.+):(.+)@)?([a-z0-9\.\-]+)(:([0-9]+))?/(.+)"
+
+if [[ "$(egrep "$RE" <<< $PSQLURL)" == "" ]]; then
+  log "FATAL: database URL is not valid"
+  exit 1
+fi
+
+PSQLHOST="$(sed -E "s#$RE#\4#" <<< $PSQLURL)"
+PSQLUSER="$(sed -E "s#$RE#\2#" <<< $PSQLURL)"
+PSQLPASS="$(sed -E "s#$RE#\3#" <<< $PSQLURL)"
+PSQLPORT="$(sed -E "s#$RE#\6#" <<< $PSQLURL)"
+DATABASE="$(sed -E "s#$RE#\7#" <<< $PSQLURL)"
+PSQLARGS="-a -e -w -h $PSQLHOST"
+
+if [[ "$DATABASE" == "" ]]; then
+  log "FATAL: missing database name"
+  exit 1
+fi
+
+if [[ "$PSQLHOST" == "" ]]; then
+  log "FATAL: missing database hostname"
+  exit 1
+fi
+
+if [[ "$PSQLUSER" != "" ]]; then
+  PSQLARGS="$PSQLARGS -U $PSQLUSER"
+fi
+
+if [[ "$PSQLPORT" != "" ]]; then
+  PSQLARGS="$PSQLARGS -p $PSQLPORT"
+fi
+
+if [[ "$PSQLPASS" != "" ]]; then
+  echo -n "$PSQLPASS" > .pgpass
+fi
+
+[[ "$(which mdb-export)" == "" ]] && log "FATAL: mdb-tools not found" && exit 1
+
+log
+log "(RE)CREATING THE DATABASE"
+psql $PSQLARGS -f - <<< "DROP DATABASE IF EXISTS $DATABASE; CREATE DATABASE $DATABASE;" 2>&1 | log -
+
+log
+log "MIGRATING THE SCHEMA"
+mdb-schema $MDBPATH postgres | psql $PSQLARGS -f - -d $DATABASE 2>&1 | log -
+
+log
+log "IMPORTING TABLES"
+for TABLE in {LOG_LOCALIDADE,LOG_LOGRADOURO,LOG_BAIRRO,LOG_CPC,LOG_FAIXA_BAIRRO,LOG_FAIXA_CPC,LOG_FAIXA_LOCALIDADE,LOG_FAIXA_UF,LOG_FAIXA_UOP,LOG_GRANDE_USUARIO,LOG_NUM_SEC,LOG_UNID_OPER,LOG_VAR_LOC,LOG_VAR_LOG,LOG_VAR_BAI}; do
+  log
+  log "TABLE '$TABLE'"
+  mdb-export -X \" -d ";" -R "\n" $MDBPATH $TABLE | sed 1d | psql $PSQLARGS -c "COPY \"$TABLE\" FROM STDIN DELIMITERS ';' csv" -d $DATABASE -- 2>&1 | log -
+done
+
+rm .pgpass
+
+log
+log "DONE!"
+
+exit 0
