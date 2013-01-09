@@ -76,14 +76,15 @@ if [[ "$PSQLPORT" != "" ]]; then
 fi
 
 if [[ "$PSQLPASS" != "" ]]; then
-  echo -n "$PSQLPASS" > .pgpass
+  echo -n "*:*:*:*:$PSQLPASS" > ~/.pgpass
+  chmod 0600 ~/.pgpass
 fi
 
 [[ "$(which mdb-export)" == "" ]] && log "FATAL: mdb-tools not found" && exit 1
 
-log
-log "(RE)CREATING THE DATABASE"
-psql $PSQLARGS -f - <<< "DROP DATABASE IF EXISTS $DATABASE; CREATE DATABASE $DATABASE;" 2>&1 | log -
+# log
+# log "(RE)CREATING THE DATABASE"
+# psql $PSQLARGS -f - <<< "DROP DATABASE IF EXISTS $DATABASE; CREATE DATABASE $DATABASE;" 2>&1 | log -
 
 log
 log "MIGRATING THE SCHEMA"
@@ -97,7 +98,7 @@ for TABLE in {LOG_LOCALIDADE,LOG_LOGRADOURO,LOG_BAIRRO,LOG_CPC,LOG_FAIXA_BAIRRO,
   mdb-export -X \" -d ";" -R "\n" $MDBPATH $TABLE | sed 1d | psql $PSQLARGS -c "COPY \"$TABLE\" FROM STDIN DELIMITERS ';' csv" -d $DATABASE -- 2>&1 | log -
 done
 
-rm .pgpass
+[[ -s "~/.pgpass" ]] && rm ~/.pgpass
 
 log
 log "DONE!"
