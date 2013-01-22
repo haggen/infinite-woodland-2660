@@ -1,0 +1,45 @@
+#!/usr/bin/env node
+
+var app, psql;
+
+app = require('commander');
+psql = require('pg').native;
+
+app
+  .version('1.0.0')
+  .option('-u, --url <url>', 'PostgreSQL database URL')
+  .parse(process.argv);
+
+if(app.url) {
+  main(app.url);
+}
+
+function main(url) {
+  psql.connect(url, function(err, db) {
+    var q, brazil;
+
+    q = 'SELECT "UFE_SG", "LOC_NO" FROM "LOG_LOCALIDADE" ORDER BY "UFE_SG", "LOC_NO"';
+
+    if(err) {
+      throw err;
+    } else {
+      brazil = {};
+
+      db.query(q, function(err, result) {
+        if(err) {
+          throw err;
+        } else {
+          result.rows.forEach(function(row) {
+            if(row.UFE_SG in brazil) {
+              brazil[row.UFE_SG].push(row.LOC_NO);
+            } else {
+              brazil[row.UFE_SG] = [row.LOC_NO];
+            }
+          });
+
+          console.log(JSON.stringify(brazil));
+        }
+      })
+    }
+  });
+}

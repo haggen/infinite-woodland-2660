@@ -7,9 +7,9 @@
 
 # Usage:
 ##
-# ./mdb2psql.sh <MDB file path> <Postgre server URL>
+# $0 <MDB file path> <PostgreSQL server URL>
 
-LOGPATH="mdb2psql.log" && touch $LOGPATH
+LOGPATH="$0.log" && touch $LOGPATH
 
 function _log() {
   if [[ "$1" == "" ]]; then

@@ -1,0 +1,20 @@
+{
+  "name": "county-summary",
+  "version": "1.0.0",
+  "description": "...",
+  "author": "Arthur Corenzan <arthur@corenzan.com>",
+  "homepage": "",
+  "main": "county-summary",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "engines": {
+    "node": ">= 0.8.x",
+    "npm": ">= 1.1.x"
+  },
+  "dependencies": {
+    "commander": ">= 1.1.1",
+    "pg": ">= 0.8.x"
+  }
+}
