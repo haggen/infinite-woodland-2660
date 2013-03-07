@@ -9,6 +9,15 @@ db.connect();
 app = express();
 app.use(express.logger());
 
+// Allow CORS
+app.use(function(request, response, next) {
+  request.header('Access-Control-Allow-Origin', '*');
+  request.header('Access-Control-Allow-Methods', 'GET');
+  request.header('Access-Control-Allow-Headers', 'Content-Type');
+
+  next();
+});
+
 app.get('/', function(request, response) {
   var q;
 
