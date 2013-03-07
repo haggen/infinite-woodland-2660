@@ -7,15 +7,17 @@ db = new pg.Client(process.env.DATABASE_URL);
 db.connect();
 
 app = express();
+app.use(express.methodOverride());
 app.use(express.logger());
 
 // Allow CORS
 app.use(function(request, response, next) {
-  request.header('Access-Control-Allow-Origin', '*');
-  request.header('Access-Control-Allow-Methods', 'GET');
-  request.header('Access-Control-Allow-Headers', 'Content-Type');
+  response.header('Access-Control-Allow-Origin', '*');
+  response.header('Access-Control-Allow-Methods', 'GET');
+  response.header('Access-Control-Allow-Headers', 'X-Requested-With, Accept, Origin, Referer, User-Agent, Content-Type, Authorization, X-Mindflash-SessionID');
 
-  next();
+  // intercept OPTIONS method
+  ('OPTIONS' == request.method) && response.send(200) || next();
 });
 
 app.get('/', function(request, response) {
