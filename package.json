@@ -1,20 +1,19 @@
 {
-  "name": "ceps",
+  "name": "infinite-woodland-2660",
   "version": "0.1.0",
   "description": "Conversor + API de acesso ao Diretório Nacional de Endereços - DNE",
   "author": "Arthur Corenzan <arthur@corenzan.com>",
-  "homepage": "",
   "repository": {
     "type": "git",
     "url": ""
   },
+  "main": "index",
   "engines": {
-    "node": ">= 0.8.3",
-    "npm": ">= 1.1.4"
+    "node": "~> 0.8",
+    "npm": "~> 1.1"
   },
   "dependencies": {
-    "express": ">= 3.0.x",
-    "pg": ">= 0.8.x"
-  },
-  "main": "index.js"
+    "express": "~> 3.0",
+    "pg": "~> 1.0"
+  }
 }
