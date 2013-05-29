@@ -87,11 +87,7 @@ app.get(/^\/([A-Z]{2})$/, function(request, response) {
   params = [request.params[0]];
 
   fetch(key, sql, params, function(data) {
-    if(data.length) {
-      response.jsonp(data);
-    } else {
-      response.send(404);
-    }
+    response.jsonp(data);
   });
 });
 
@@ -103,11 +99,7 @@ app.get(/^\/([0-9]{8})$/, function(request, response) {
   params = [request.params[0]];
 
   fetch(key, sql, params, function(data) {
-    if(data.length) {
-      response.jsonp(data);
-    } else {
-      response.send(404);
-    }
+    response.jsonp(data);
   });
 });
 
