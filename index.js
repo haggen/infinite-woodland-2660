@@ -1,9 +1,9 @@
 var express, app, pg, db, cache, maxage, fetch;
 
-require('nodefly').profile(
-  process.env.NODEFLY_APPLICATION_KEY,
-  [process.env.APPLICATION_NAME, 'Heroku']
-);
+require('nodetime').profile({
+  accountKey: process.env.NODETIME_ACCOUNT_KEY,
+  appName: process.env.APPLICATION_NAME
+});
 
 express = require('express');
 latency = require('express-latency');
