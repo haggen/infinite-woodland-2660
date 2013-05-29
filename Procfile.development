@@ -1,0 +1,2 @@
+web: supervisor index.js
+redis: redis-server

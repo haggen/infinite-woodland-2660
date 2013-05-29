@@ -1,11 +1,18 @@
-var express, app, pg, db, redis, cache, maxage, fetch;
+var express, app, pg, db, cache, maxage, fetch;
+
+require('nodefly').profile(
+  process.env.NODEFLY_APPLICATION_KEY,
+  [process.env.APPLICATION_NAME, 'Heroku']
+);
 
 express = require('express');
+latency = require('express-latency');
+cache = require('./cache');
 pg = require('pg').native;
-redis = require('redis-url');
 
-(db = new pg.Client(process.env.DATABASE_URL)) && db.connect();
-cache = redis.connect(process.env.REDIS_URL);
+db = new pg.Client(process.env.DATABASE_URL);
+
+db && db.connect();
 
 maxage = parseInt(process.env.CACHE, 10);
 
@@ -39,7 +46,7 @@ fetch = function(key, sql, params, next) {
       next(data)
     } else {
       fetch.database(sql, params, function(data) {
-        cache.setex(key, maxage, JSON.stringify(data));
+        cache.push(key, JSON.stringify(data));
         next(data);
       });
     }
@@ -49,17 +56,15 @@ fetch = function(key, sql, params, next) {
 // Fetch from database
 fetch.database = function(sql, params, next) {
   db.query(sql, params, function(err, query) {
-    console.log(err);
+    err && console.log(err);
     next(err ? [] : query.rows);
   });
 };
 
 // Fetch from cache
 fetch.cache = function(key, next) {
-  cache.get(key, function(err, data) {
-    console.log(err);
-    next(data ? JSON.parse(data) : null);
-  });
+  var data = cache.fetch(key);
+  next(data ? JSON.parse(data) : null);
 };
 
 app.get('/', function(request, response) {
@@ -82,7 +87,11 @@ app.get(/^\/([A-Z]{2})$/, function(request, response) {
   params = [request.params[0]];
 
   fetch(key, sql, params, function(data) {
-    response.jsonp(data);
+    if(data.length) {
+      response.jsonp(data);
+    } else {
+      response.send(404);
+    }
   });
 });
 
@@ -94,8 +103,14 @@ app.get(/^\/([0-9]{8})$/, function(request, response) {
   params = [request.params[0]];
 
   fetch(key, sql, params, function(data) {
-    response.jsonp(data);
+    if(data.length) {
+      response.jsonp(data);
+    } else {
+      response.send(404);
+    }
   });
 });
+
+latency.measure(app, {print: true});
 
 app.listen(process.env.PORT);
