@@ -3,21 +3,18 @@
   "version": "1.0.0",
   "description": "API de acesso ao Diretório Nacional de Endereços - DNE",
   "author": "Arthur Corenzan <arthur@corenzan.com>",
+  "main": "index",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/haggen/infinite-woodland-2660"
   },
-  "main": "index",
   "engines": {
     "node": "~> 0.10",
     "npm": "~> 1.2"
   },
   "dependencies": {
-    "nodetime": "~> 0.8",
-    "express": "~> 3.0",
     "express-latency": "~> 0.0.3",
-    "redis-url": "~> 0.1",
-    "hiredis": "~> 0.1",
+    "express": "~> 3.0",
     "pg": "~> 1.0"
   }
 }

@@ -1,14 +1,9 @@
 var express, app, pg, db, cache, maxage, fetch;
 
-require('nodetime').profile({
-  accountKey: process.env.NODETIME_ACCOUNT_KEY,
-  appName: process.env.APPLICATION_NAME
-});
-
 express = require('express');
 latency = require('express-latency');
-cache = require('./cache');
-pg = require('pg').native;
+cache   = require('./cache');
+pg      = require('pg').native;
 
 db = new pg.Client(process.env.DATABASE_URL);
 
