@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # Requires mdb-tools [1] and psql [2]
-##
+#
 # 1 - http://mdbtools.sourceforge.net
 # 2 - http://www.postgresql.org
 
 # Usage:
-##
+#
 # $0 <MDB file path> <PostgreSQL server URL>
 
 LOGPATH="$0.log" && touch $LOGPATH
